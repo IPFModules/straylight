@@ -75,8 +75,18 @@ $modversion["tables"] = icms_getTablesArray($modversion['dirname'], $modversion[
 
 /** Templates information */
 $modversion['templates'] = array(
-	array("file" => "straylight_admin_client.html", "description" => "client Admin Index"),
-	array("file" => "straylight_client.html", "description" => "client Index"),
+	array("file" => "straylight_admin_client.html", "description" => "Client admin index"),
+	array("file" => "straylight_client.html", "description" => "Client index"),
 
-	array('file' => 'straylight_header.html', 'description' => 'Module Header'),
-	array('file' => 'straylight_footer.html', 'description' => 'Module Footer'));
+	array('file' => 'straylight_header.html', 'description' => 'Module header'),
+	array('file' => 'straylight_footer.html', 'description' => 'Module footer'));
+
+/** Preferences information **/
+$modversion['config'][] = array(
+	'name' => 'timestamp_tolerance',
+	'title' => '_MI_STRAYLIGHT_TIMESTAMP_TOLERANCE',
+	'description' => '_MI_STRAYLIGHT_TIMESTAMP_TOLERANCEDSC',
+	'formtype' => 'textbox',
+	'valuetype' => 'int',
+	'default' => '600'
+);

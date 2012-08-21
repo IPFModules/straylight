@@ -22,11 +22,12 @@ class mod_straylight_Client extends icms_ipf_Object
 	public function __construct(&$handler)
 	{
 		parent::__construct($handler);
-
 		$this->quickInitVar("client_id", XOBJ_DTYPE_INT, TRUE);
-		$this->quickInitVar("authorised", XOBJ_DTYPE_INT, TRUE, FALSE, FALSE, 0);
+		$this->quickInitVar("authorised", XOBJ_DTYPE_INT, TRUE, FALSE, FALSE, 0); // Must be false
 		$this->quickInitVar("shared_hmac_key", XOBJ_DTYPE_TXTAREA, TRUE);
+		$this->initCommonVar('counter'); // Used to track requests and test for replay attacks
 		$this->setControl("authorised", "yesno");
+		$this->doMakeFieldreadOnly('counter'); // Value must not be changed
 	}
 
 	/**
