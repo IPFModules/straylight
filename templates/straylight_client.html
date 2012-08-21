@@ -1,0 +1,15 @@
+<{includeq file='db:straylight_header.html'}>
+<{if $straylight_client}>
+<div id="straylight-client-container">
+	<h1><{$straylight_client.uid}></h1>
+		<div><b><{$smarty.const._CO_STRAYLIGHT_CLIENT_AUTHORISED}></b>: <{$straylight_client.authorised}></div>
+		<div><b><{$smarty.const._CO_STRAYLIGHT_CLIENT_PUBLICKEY}></b></div>
+				<div><{$straylight_client.publickey}></div>
+
+</div>
+<{/if}>
+<{if $straylight_client_table}>
+<h1><{$straylight_title}></h1>
+<{$straylight_client_table}>
+<{/if}>
+<{includeq file='db:straylight_footer.html'}>

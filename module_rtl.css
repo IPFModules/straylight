@@ -1,0 +1,68 @@
+.post-date{float:right; margin:0 12px 10px 0;}
+.post-date .month{background:#000000 url(images/post-month.gif) no-repeat scroll 0 0; color: #FFF; display:block; font-size:80%;height:25px;line-height:25px;margin:0;text-align:center;width:48px;}
+.post-date .day{background:#42A4DC url(images/post-day.gif) no-repeat scroll 0 0; color: #000; display:block; font-size:140%;height:30px;line-height:25px;margin:1px 0 0;text-align:center;width:48px;}
+.post-title{margin:0;padding:2px 0 5px 0;}
+
+
+.straylight_headertable {padding: 0; margin: 0; border-bottom: 1px solid; margin-bottom: 10px;}
+.straylight_modulename {font-size: 0.8em; text-align: left; font-weight: bold; padding-right: 0.3em;	line-height: 18px;}
+.straylight_breadcrumb {font-size: 0.8em; line-height: 18px;}
+.straylight_adminlinks {padding-top: 15px; padding-bottom: 5px; font-size: 0.8em; text-align: center; line-height: 18px;}
+
+.straylight_post_container {
+	margin-bottom: 35px;
+}
+	.straylight_post_container h1 {
+		margin-top: 20px;
+		margin-bottom:1px;
+		padding-bottom:3px;
+	}
+.straylight_post_info {
+	line-height:22px;
+	margin:0 0 0 60px;
+	font-size: 80%;
+}
+.straylight_post_content {clear:both;margin:0; overflow:hidden;text-align:justify;}
+.straylight_post_categories {
+	background: url(images/category.png) no-repeat left center;
+	padding: 0px 20px;
+	display: block;
+	float: right;
+}
+.left_main {
+	padding: 0 10px 8px 0;
+	display:block;
+	float: right;
+	width:100%;
+	line-height:17px;
+	height:15px;
+	text-align:left;
+	vertical-align:top;
+}
+.straylight_post_filed_under {
+	float: right;
+}
+#straylight_post_comments_container {}
+.straylight_post_comments {
+	background-image: url(images/comments.gif);
+	background-repeat: no-repeat;
+	margin:5px 0 0 0;
+	text-align:right;
+	padding-left: 15px;
+	font-size: 80%;
+	float: right;
+}
+.straylight_post_more {
+	margin:5px 0 0 0;
+	font-size: 80%;
+}
+.straylight_admin_links {
+	margin:5px 0 0 0;
+}
+#straylight_navbar {
+	text-align: center;
+}
+#straylight_rss {
+	text-align: center;
+	padding-top: 10px;
+}

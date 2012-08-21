@@ -1,0 +1,10 @@
+<div class="straylight_headertable">
+	<{if $straylight_module_home}>
+	<span class="straylight_modulename"><{$straylight_module_home}></span>
+	<{/if}>
+	<{if $straylight_category_path}>
+	<span class="straylight_breadcrumb"><{if $straylight_module_home}>&gt;<{/if}><{$straylight_category_path}></span>
+	<{/if}>
+</div>
+
+<div id="straylight_submit" style="clear: both;"><{if $straylight_showSubmitLink && $straylight_userCanSubmit}><a href="<{$straylight_url}>post.php?op=mod"><{$smarty.const._MI_STRAYLIGHT_POST_ADD}></a><{/if}></div>
