@@ -24,6 +24,16 @@ class mod_straylight_ClientHandler extends icms_ipf_Handler {
 	}
 	
 	/**
+	 * Updates the client request counter
+	 */
+	
+	public function update_request_counter($clientObj, $counter){
+		$clientObj->setVar('request_counter', $counter);
+		$this->insert($clientObj, TRUE);
+		echo 'counter is: ' . $counter;
+	}
+	
+	/**
 	 * Toggles Straylight authentication online or offline
 	 *
 	 * @param int $token_id
@@ -42,7 +52,7 @@ class mod_straylight_ClientHandler extends icms_ipf_Handler {
 			$clientObj->setVar($field, 1);
 			$authorised = 1;
 		}
-		$this->insert($clientObj, true);
+		$this->insert($clientObj, TRUE);
 
 		return $authorised;
 	}

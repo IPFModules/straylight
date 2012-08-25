@@ -96,9 +96,9 @@ if (in_array($clean_op, $valid_op, TRUE)) {
 			icms_cp_header();
 			$icmsModule->displayAdminMenu(0, _AM_STRAYLIGHT_CLIENTS);
 			$objectTable = new icms_ipf_view_Table($straylight_client_handler);
-			$objectTable->addColumn(new icms_ipf_view_Column("uid", _GLOBAL_LEFT, TRUE, 'user_name', FALSE, _CO_STRAYLIGHT_USER_NAME));	
-			$objectTable->addColumn(new icms_ipf_view_Column("uid", _GLOBAL_LEFT, TRUE));				
-			$objectTable->addColumn(new icms_ipf_View_Column("authorised", _GLOBAL_LEFT, true));
+			$objectTable->addColumn(new icms_ipf_view_Column("client_id"));				
+			$objectTable->addColumn(new icms_ipf_view_Column("authorised"));
+			$objectTable->addColumn(new icms_ipf_view_Column("request_counter"));
 			$objectTable->addIntroButton("addclient", "client.php?op=mod", _AM_STRAYLIGHT_CLIENT_CREATE);
 			$icmsAdminTpl->assign("straylight_client_table", $objectTable->fetch());
 			$icmsAdminTpl->display("db:straylight_admin_client.html");
