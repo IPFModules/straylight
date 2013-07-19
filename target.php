@@ -18,8 +18,8 @@
  * no evidence that longer keys improve it. 256 is what the algorithm uses internally.
  * 
  * Randomness: Get your key from a high quality random source, such as GRC's perfect passwords page.
- * Be aware that random number generation on small devices (notably Arduino) can be extremely bad.
- * https://www.grc.com/passwords.htm
+ * Be aware that random number generation on small devices (notably Arduino) can be extremely bad 
+ * (that is to say, completely inadequate for security purposes) https://www.grc.com/passwords.htm
  * 
  * Data length: The overall length of device supplied data used to calculate the HMAC should be at 
  * least 256 characters for security reasons. So you may want to adjust the length of your RSOC 
@@ -34,7 +34,7 @@
  */
 
 function report_error($error) {
-	echo 'Error: ' . $error;
+	echo 'Error: ' . $error; // Comment out the error message on production sites
 	exit;
 }
 
@@ -46,7 +46,7 @@ $clean_client_id = $clean_command = $clean_counter = $clean_timestamp = $clean_r
 $clean_hmac = $my_hmac = $data = '';
 $valid_request = $authenticated = $straylight_authorised_client = FALSE;
 
-// Check that required parameters have been supplied. Exit if anything missing.
+// 1. Check that required parameters have been supplied. Exit if anything missing.
 if (empty($_GET['client_id']) 
 		|| empty($_GET['command']) 
 		|| empty($_GET['counter']) 
@@ -56,15 +56,15 @@ if (empty($_GET['client_id'])
 	report_error('Missing required parameter');
 }
 
-// Sanitise input, exit if any parameter is rendered empty as a result.
-$clean_client_id = isset($_GET['client_id']) ? (int)($_GET['client_id']) : 0;
-$clean_counter = isset($_GET['counter']) ? (int)($_GET['counter']) : 0;
+// 2. Sanitise input, exit if any parameter is rendered empty as a result.
+$clean_client_id = isset($_GET['client_id']) ? (int)($_GET['client_id']) : report_error('No client ID');
+$clean_counter = isset($_GET['counter']) ? (int)($_GET['counter']) : report_error('No counter');
 $clean_command = icms_core_DataFilter::checkVar($_GET['command'], 'str');
-$clean_timestamp = isset($_GET['timestamp']) ? (int)($_GET['timestamp']) : 0;
+$clean_timestamp = isset($_GET['timestamp']) ? (int)($_GET['timestamp']) : report_error('No timestamp');
 $clean_random = icms_core_DataFilter::checkVar($_GET['random'], 'str');
 $clean_hmac = icms_core_DataFilter::checkVar($_GET['hmac'], 'str');
 
-// Check command is valid part of command vocabulary. Exit if command invalid.
+// 3. Check command against vocabulary whitelist. Exit if command invalid.
 $valid_commands = array(
 	'check_pulse',
 	'check_status',
@@ -83,15 +83,15 @@ if (in_array($clean_command, $valid_commands))
 }
 
 /**
- * Validate input:
+ * 4. Validate input:
  *
- * 1. The device must be known and authorised for remote Straylight administration.
- * 2. The concatenated request parameters must be authenticated by SHA256 HMAC with per-device key
- * 3. The timestamp must fall within an acceptable range
- * 4. The counter must be > than the previously stored value to protect against replay attacks
+ * a. The device must be known and authorised for remote Straylight administration.
+ * b. The concatenated request parameters must be authenticated by SHA256 HMAC with per-device key
+ * c. The timestamp must fall within an acceptable range
+ * d. The counter must be > than the previously stored value to protect against replay attacks
  */
 
-// 1. Check the device is currently Straylight authorised.
+// a. Check the device is currently Straylight authorised.
 $straylight_client_handler = icms_getModuleHandler('client', basename(dirname(__FILE__)), 'straylight');
 
 $straylight_client = $straylight_client_handler->get($clean_client_id);
@@ -102,7 +102,7 @@ if ($straylight_client && ($straylight_client->getVar('authorised', 'e') == TRUE
 }
 
 /**
- * 2. Authenticate message via SHA256 HMAC and preshared key.
+ * b. Authenticate message via SHA256 HMAC and preshared key.
  * 
  * Note that client devices must also concatenate these fields in the same order when doing their
  * own HMAC calculation. To protect against tampering, all request fields must be included in the 
@@ -125,17 +125,19 @@ $data = $clean_client_id . $clean_command
 		;
 if (!empty($key)) {
 	$my_hmac = hash_hmac('sha256', $data, $key, FALSE);
+} else {
+	report_error('No preshared key');
 }
 if ($my_hmac == $clean_hmac) // HMAC verified, authenticity and integrity has been established. 
 {
-	// 3. Check timestamp falls in acceptable range (defined in module preferences, default 10 minutes)
+	// c. Check timestamp falls in acceptable range (defined in module preferences, default 10 minutes)
 	$time = time();
 	$timestamp_differential = $time - $clean_timestamp;
 	if ($clean_timestamp > $time || $timestamp_differential > icms_getConfig('timestamp_tolerance', $straylight)) {
 		report_error('Bad timestamp. Command has expired. Check the clock of your device is accurate.');
 	}
 	
-	// 4. Check request counter exceeds the stored value (guard against replay attacks)
+	// d. Check request counter exceeds the stored value (guard against replay attacks)
 	if ($clean_counter > $straylight_client->getVar('request_counter')) {
 		$straylight_client_handler->update_request_counter($straylight_client, $clean_counter);
 	} else {
@@ -226,7 +228,7 @@ if ($straylight_authorised_client && $valid_request && $authenticated)
 		// Upload of custom avatar images disallowed.
 		
 		case "war_footing":
-			echo "Shift site to war footing";
+			echo "Site shifted to war footing";
 			
 			break;
 	}
@@ -235,4 +237,4 @@ else {
 	exit;
 }
 
-echo '<br />Everything pass the test';
+// echo '<br />Everything pass the test';
