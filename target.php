@@ -34,7 +34,8 @@
  */
 
 function report_error($error) {
-	echo 'Error: ' . $error; // Comment out the error message on production sites
+	// IMPORTANT: Ensure the error message is commented OUT on production sites
+	echo 'Error: ' . $error;
 	exit;
 }
 
