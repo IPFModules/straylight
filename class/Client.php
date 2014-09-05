@@ -23,6 +23,7 @@ class mod_straylight_Client extends icms_ipf_Object
 	{
 		parent::__construct($handler);
 		$this->quickInitVar("client_id", XOBJ_DTYPE_INT, TRUE);
+		$this->quickInitVar("title", XOBJ_DTYPE_TXTBOX, TRUE); // Name of remote device
 		$this->quickInitVar("authorised", XOBJ_DTYPE_INT, TRUE, FALSE, FALSE, 0); // Must be false
 		$this->quickInitVar("shared_hmac_key", XOBJ_DTYPE_TXTAREA, TRUE);
 		$this->quickInitVar("request_counter", XOBJ_DTYPE_INT, TRUE, FALSE, FALSE, 0); // Used to track requests and test for replay attacks

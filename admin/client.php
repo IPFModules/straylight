@@ -98,6 +98,7 @@ if (in_array($clean_op, $valid_op, TRUE)) {
 			$objectTable = new icms_ipf_view_Table($straylight_client_handler);
 			$objectTable->addColumn(new icms_ipf_view_Column("client_id"));				
 			$objectTable->addColumn(new icms_ipf_view_Column("authorised"));
+			$objectTable->addColumn(new icms_ipf_view_Column("title"));
 			$objectTable->addColumn(new icms_ipf_view_Column("request_counter"));
 			$objectTable->addIntroButton("addclient", "client.php?op=mod", _AM_STRAYLIGHT_CLIENT_CREATE);
 			$icmsAdminTpl->assign("straylight_client_table", $objectTable->fetch());
