@@ -35,7 +35,16 @@
  * @version		$Id$
  */
 
-function report_error($error) {
+function straylight_update_config($conf_name, $conf_value) {
+	$criteria = icms_buildCriteria(array('conf_name' => $conf_name));
+	$config_handler = icms::handler('icms_config');
+	$configs = $config_handler->getConfigs($criteria);
+	$configs = array_pop($configs);
+	$configs->setVar('conf_value', $conf_value);
+	$config_handler->insertConfig($configs);
+}
+
+function straylight_report_error($error) {
 	// IMPORTANT: Ensure the error message is commented OUT on production sites
 	echo 'Error: ' . $error;
 	exit;
@@ -68,27 +77,26 @@ if (empty($_POST['client_id'])
 		|| empty($_POST['timestamp']) 
 		|| empty($_POST['random']) 
 		|| empty($_POST['hmac'])) {
-	report_error('Missing required parameter');
+	straylight_report_error('Missing required parameter');
 }
 
 // 2. Check that required parameters are of expected type and sanitise. Exit if encounter bad data.
 $clean_client_id = ctype_digit($_POST['client_id']) ? 
-	(int)($_POST['client_id']) : report_error('Client ID not decimal format');
+	(int)($_POST['client_id']) : straylight_report_error('Client ID not decimal format');
 $clean_counter = ctype_digit($_POST['counter']) ?
-	(int)($_POST['counter']) : report_error('Counter not in decimal format');
+	(int)($_POST['counter']) : straylight_report_error('Counter not in decimal format');
 $clean_command = trim($_POST['command']);
 $clean_timestamp = ctype_digit($_POST['timestamp']) ?
-	(int)($_POST['timestamp']) : report_error('Timestamp not decimal format');
+	(int)($_POST['timestamp']) : straylight_report_error('Timestamp not decimal format');
 $clean_random = ctype_alnum($_POST['random']) ?
-	trim($_POST['random']) : report_error('Random factor not alphanumeric');
+	trim($_POST['random']) : straylight_report_error('Random factor not alphanumeric');
 $clean_hmac = trim($_POST['hmac']);
 
 // 2. Check command against vocabulary whitelist. Exit if command invalid. Alphabetical only.
 $valid_commands = array(
 	'checkPulse',
-	'checkStatus',
-	'openSite',
 	'closeSite',
+	'openSite',
 	'clearCache',
 	'debugOn',
 	'debugOff',
@@ -97,7 +105,7 @@ $valid_commands = array(
 if (in_array($clean_command, $valid_commands)) {
 	$valid_request = TRUE;
 } else {
-	report_error('Invalid command');
+	straylight_report_error('Invalid command');
 }
 
 /**
@@ -114,7 +122,7 @@ $timestamp_differential = $time - $clean_timestamp;
 if ($clean_timestamp <= $time && $timestamp_differential < icms_getConfig('timestamp_tolerance', 'straylight')) {
 	$good_timestamp = TRUE;
 } else {
-	report_error('Bad timestamp. Check the clock of your device is accurate.');
+	straylight_report_error('Bad timestamp. Check the clock of your device is accurate.');
 }
 
 // b. Check the device is currently Straylight authorised.
@@ -123,7 +131,7 @@ $straylight_client = $straylight_client_handler->get($clean_client_id);
 if ($straylight_client && ($straylight_client->getVar('authorised', 'e') == TRUE)) {
 	$straylight_authorised_client = TRUE;
 } else {
-	report_error('Client not Straylight authorised');
+	straylight_report_error('Client not Straylight authorised');
 }
 
 // c. Check request counter exceeds the stored value (guard against replay attacks)
@@ -131,7 +139,7 @@ if ($clean_counter > $straylight_client->getVar('request_counter', 'e')) {
 	$good_counter = TRUE;
 	$straylight_client_handler->update_request_counter($straylight_client, $clean_counter);
 } else {
-	report_error('Bad counter. This is not the most recent request from the client device.');
+	straylight_report_error('Bad counter. This is not the most recent request from the client device.');
 }
 
 /**
@@ -158,7 +166,7 @@ $data = $clean_client_id . $clean_command
 if (!empty($key)) {
 	$my_hmac = hash_hmac('sha256', $data, $key, FALSE);
 } else {
-	report_error('No preshared key');
+	straylight_report_error('No preshared key');
 }
 if ($my_hmac == $clean_hmac) // HMAC verified, authenticity and integrity has been established. 
 {
@@ -166,7 +174,7 @@ if ($my_hmac == $clean_hmac) // HMAC verified, authenticity and integrity has be
 	echo '<br />SUCCESS<br />';
 }
 else {
-	report_error('Bad HMAC. Failed to confirm authenticity and integrity of message. Discarding.<br />');
+	straylight_report_error('Bad HMAC. Failed to confirm authenticity and integrity of message. Discarding.<br />');
 }
 
 // Final sanity check. Explicitly check that all necessary tests have been passed
@@ -177,7 +185,7 @@ if ($valid_request
 		&& $good_hmac) {
 	$authenticated = TRUE;	
 } else {
-	report_error('Sanity check failed, request not authenticated.');
+	straylight_report_error('Sanity check failed, request not authenticated.');
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -196,51 +204,36 @@ if ($authenticated == TRUE)
 {
 	switch ($clean_command)
 	{
-		// Returns a heartbeat, if client receives no response site will be presumed dead
+		// Returns an 'ok' code if site up.
 		case "checkPulse":
-			echo "Check pulse";
-			break;
-
-		// Returns a readout of Straylight's current settings
-		case "checkStatus":
-			echo "Check status";
-			break;
-
-		// Opens the site
-		case "openSite":
-			echo "Open site";
-			$icmsConfig['closesite'] = 0;
+			http_response_code(200); // Requires PHP 5.4+
 			break;
 
 		// Closes the site
 		case "closeSite":
-			echo "Close site";
-			$icmsConfig['closesite'] = 1;
-			$config_handler = icms::handler('icms_config');
-			$config = $config_handler->getConfigs();
-			foreach ($config as $item) 
-			{
-				echo $item->getVar('conf_name') . '<br /><br />';
-			}
-			$config_handler->insertConfig($config);
+			straylight_update_config('closesite', 1);
+			break;
+		
+		// Not implemented. Access to relevant files requires having permissions to view the site
+		// when it is closed. Could probably be accomplished using raw SQL but that has security 
+		// implications (DB password) that I have not yet fully contemplated. So for the moment, 
+		// it's out.
+		case "openSite":
 			break;
 
 		// Clears the /cache and /templates_c folders
 		case "clearCache":
 			echo "Clear cache";
-			
 			break;
 
 		// Turns inline debugging on
 		case "debugOn":
-			echo "Debug on";
-			
+			straylight_update_config('debug_mode', 1);		
 			break;
 
 		// Turns inline debugging off
 		case "debugOff":
-			echo "Debug off";
-			
+			straylight_update_config('debug_mode', 0);
 			break;
 
 		// Prepares the site to resist casual abuse by idiots. Protective measures include:
@@ -260,7 +253,7 @@ if ($authenticated == TRUE)
 		// Upload of custom avatar images disallowed.
 		
 		case "lockDown":
-			echo "Site locked down";
+			// Run straylight_update_config for each setting
 			break;
 	}
 }
