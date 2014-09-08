@@ -30,13 +30,60 @@
 $client_id = '3'; // The ID of the authorised straylight client you created in the module
 $pre_shared_key = 'JOfUS03S9CDtPyHnNH0DbihTDauaEYDidiSzFB1pqOzij9heJZanLC4m3762mAdqnYkc8SaSc7Nfg7648t72pPVvYjfWC8XvLkeIe7fZYh4lum2DhH7HCNqCjHuPZs9A0lgD6BTN860PHjHP1H6myshaWzgvH6tzA83qXj7jUDtMqsorjRLrdRACqITBr1tUQAfkCbMhHlAUgOpcGMooGIl5RQWnY1Yi1Rncu8JF5Lx378NrVfe9m5RlWMYRG1jI'; // The same 256 character random key you registered in the authorised client
 $url = 'http://192.168.1.99/dev'; // Enter the base URL of your site (eg. http://www.mysite.com or http://localhost etc).
+$counter = 60; // Need to increment this each run of the script. Sorry!
+
+// Initialising other variables (no need to edit)
+$command = trim($_POST['command'], FILTER_SANITISE_STRING);
+$timestamp = time();
+$random = generateRandomString();
 $path = $url . '/modules/straylight/target.php';
-$action = '';
+$data = '';
+$my_hmac = '';
+
+// For convenience (testing) sake, but this is NOT an acceptable (secure) way to generate random strings
+// Also, don't forget that the total length of all parameters sent in a Straylight request should be
+// > 256 characters in order to maintain the full security of the HMAC.
+function generateRandomString($length = 62) {
+    return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
+}
 
 echo '<h1>Straylight test script</h1>';
 
-switch ($action) {
+switch ($_POST['action']) {
 	case "send":
+		// Must retain EXACTLY the same order and parameters as in target.php
+		$data = $client_id
+			. $command 
+			. $counter
+			. $timestamp
+			. $random;
+		$my_hmac = hash_hmac('sha256', $data, $pre_shared_key, FALSE);
+		$command_parameters = array(
+			'client_id' => $client_id,
+			'command' => $command,
+			'counter' => $counter,
+			'timestamp' => $timestamp,
+			'random' => $random,
+			'hmac' => $my_hmac);
+		
+		// Post data to target.php for execution
+		foreach($command_parameters as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+		rtrim($fields_string, '&');
+
+		//open connection
+		$ch = curl_init();
+
+		//set the url, number of POST vars, POST data
+		curl_setopt($ch, CURLOPT_URL, $path);
+		curl_setopt($ch, CURLOPT_POST, count($command_parameters));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+
+		//execute post
+		$result = curl_exec($ch);
+
+		//close connection
+		curl_close($ch);
+		
 		break;
 	
 	default: // Show the command menu
@@ -61,15 +108,16 @@ switch ($action) {
 		}
 
 		// Command menu
-		$form = '<form name="input" action="' . $path . '" method="get">
-			<input type="radio" name="check_pulse" value="check_pulse">Check pulse<br />
-			<input type="radio" name="check_status" value="check_status">Check status<br />
-			<input type="radio" name="open_site" value="open_site">Open site<br />
-			<input type="radio" name="close_site" value="close_site">Close site<br />
-			<input type="radio" name="clear_cache" value="clear_cache">Clear cache<br />
-			<input type="radio" name="debug_on" value="debug_on">Debug on<br />
-			<input type="radio" name="debug_off" value="debug_off">Debug off<br />
-			<input type="radio" name="war_footing" value="war_footing">War footing<br />
+		$form = '<form name="input" action="' . $_SERVER['PHP_SELF'] . '" method="post">
+			<input type="radio" name="command" value="checkPulse">Check pulse<br />
+			<input type="radio" name="command" value="checkStatus">Check status<br />
+			<input type="radio" name="command" value="openSite">Open site<br />
+			<input type="radio" name="command" value="closeSite">Close site<br />
+			<input type="radio" name="command" value="clearCache">Clear cache<br />
+			<input type="radio" name="command" value="debugOn">Debug on<br />
+			<input type="radio" name="command" value="debugOff">Debug off<br />
+			<input type="radio" name="command" value="lockDown">Lock down<br />
+			<input type="hidden" name="action" value="send">
 			<input type="submit" value="Submit">
 		</form>';
 		echo $form;

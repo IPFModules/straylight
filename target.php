@@ -62,39 +62,37 @@ $authenticated = FALSE; // Set to TRUE if pass all validation and authentication
 
 
 // 1. Check that required parameters have been supplied. Exit if anything missing.
-if (empty($_GET['client_id']) 
-		|| empty($_GET['command']) 
-		|| empty($_GET['counter']) 
-		|| empty($_GET['timestamp']) 
-		|| empty($_GET['random']) 
-		|| empty($_GET['hmac'])) {
+if (empty($_POST['client_id']) 
+		|| empty($_POST['command']) 
+		|| empty($_POST['counter']) 
+		|| empty($_POST['timestamp']) 
+		|| empty($_POST['random']) 
+		|| empty($_POST['hmac'])) {
 	report_error('Missing required parameter');
 }
 
 // 2. Check that required parameters are of expected type and sanitise. Exit if encounter bad data.
-$clean_client_id = ctype_digit($_GET['client_id']) ? 
-	(int)($_GET['client_id']) : report_error('Client ID not decimal format');
-$clean_counter = ctype_digit($_GET['counter']) ?
-	(int)($_GET['counter']) : report_error('Counter not in decimal format');
-$clean_command = ctype_alpha($_GET['command']) ? 
-	trim(filter_var($_GET['command'], FILTER_SANITISE_STRING)) : report_error('Command not alpha string');
-$clean_timestamp = ctype_digit($_GET['timestamp']) ?
-	(int)($_GET['timestamp']) : report_error('Timestamp not decimal format');
-$clean_random = ctype_alnum($_GET['random']) ?
-	trim(filter_var($_GET['random'], FILTER_SANITISE_STRING)) : report_error('Random factor not alphanumeric');
-$clean_hmac = ctype_alnum($_GET['hmac']) ?
-	trim(filter_var($_GET['hmac'], FILTER_SANITISE_STRING)) : report_error('HMAC not alphanumeric');
+$clean_client_id = ctype_digit($_POST['client_id']) ? 
+	(int)($_POST['client_id']) : report_error('Client ID not decimal format');
+$clean_counter = ctype_digit($_POST['counter']) ?
+	(int)($_POST['counter']) : report_error('Counter not in decimal format');
+$clean_command = trim($_POST['command']);
+$clean_timestamp = ctype_digit($_POST['timestamp']) ?
+	(int)($_POST['timestamp']) : report_error('Timestamp not decimal format');
+$clean_random = ctype_alnum($_POST['random']) ?
+	trim($_POST['random']) : report_error('Random factor not alphanumeric');
+$clean_hmac = trim($_POST['hmac']);
 
-// 2. Check command against vocabulary whitelist. Exit if command invalid.
+// 2. Check command against vocabulary whitelist. Exit if command invalid. Alphabetical only.
 $valid_commands = array(
-	'check_pulse',
-	'check_status',
-	'open_site',
-	'close_site',
-	'clear_cache',
-	'debug_on',
-	'debug_off',
-	'war_footing');
+	'checkPulse',
+	'checkStatus',
+	'openSite',
+	'closeSite',
+	'clearCache',
+	'debugOn',
+	'debugOff',
+	'lockDown');
 
 if (in_array($clean_command, $valid_commands)) {
 	$valid_request = TRUE;
@@ -113,7 +111,7 @@ if (in_array($clean_command, $valid_commands)) {
 // a. Check timestamp falls in acceptable range (defined in module preferences, default 10 minutes)
 $time = time();
 $timestamp_differential = $time - $clean_timestamp;
-if ($clean_timestamp < $time && $timestamp_differential < icms_getConfig('timestamp_tolerance', 'straylight')) {
+if ($clean_timestamp <= $time && $timestamp_differential < icms_getConfig('timestamp_tolerance', 'straylight')) {
 	$good_timestamp = TRUE;
 } else {
 	report_error('Bad timestamp. Check the clock of your device is accurate.');
@@ -156,8 +154,7 @@ $key = $straylight_client->getVar('shared_hmac_key', 'e');
 $data = $clean_client_id . $clean_command 
 		. $clean_counter
 		. $clean_timestamp
-		. $clean_random
-		;
+		. $clean_random;
 if (!empty($key)) {
 	$my_hmac = hash_hmac('sha256', $data, $key, FALSE);
 } else {
@@ -166,9 +163,10 @@ if (!empty($key)) {
 if ($my_hmac == $clean_hmac) // HMAC verified, authenticity and integrity has been established. 
 {
 	$good_hmac = TRUE;
+	echo '<br />SUCCESS<br />';
 }
 else {
-	report_error('Bad HMAC. Failed to confirm authenticity and integrity of message. Discarding.');
+	report_error('Bad HMAC. Failed to confirm authenticity and integrity of message. Discarding.<br />');
 }
 
 // Final sanity check. Explicitly check that all necessary tests have been passed
@@ -186,29 +184,36 @@ if ($valid_request
 ////////// REQUEST HAS PASSED VALIDATION AND AUTHENTICATION //////////
 //////////////////////////////////////////////////////////////////////
 
-// Proceed to process the command
+/* Proceed to process the command
+ * 
+ * To extend the list of commands, simply i) add it to the command vocabulary array (see
+ * comment 2. above), and ii) add a matching case statement below with the logic for implementing
+ * it. The authentication mechanism is independent and will prevent unauthorised commands from 
+ * being executed, so you can safely add things to the list. Commands must be alphabetical characters
+ * only - no underscores, hyphens or numbers.
+ */
 if ($authenticated == TRUE)
 {
 	switch ($clean_command)
 	{
 		// Returns a heartbeat, if client receives no response site will be presumed dead
-		case "check_pulse":
+		case "checkPulse":
 			echo "Check pulse";
 			break;
 
 		// Returns a readout of Straylight's current settings
-		case "check_status":
+		case "checkStatus":
 			echo "Check status";
 			break;
 
 		// Opens the site
-		case "open_site":
+		case "openSite":
 			echo "Open site";
 			$icmsConfig['closesite'] = 0;
 			break;
 
 		// Closes the site
-		case "close_site":
+		case "closeSite":
 			echo "Close site";
 			$icmsConfig['closesite'] = 1;
 			$config_handler = icms::handler('icms_config');
@@ -221,19 +226,19 @@ if ($authenticated == TRUE)
 			break;
 
 		// Clears the /cache and /templates_c folders
-		case "clear_cache":
+		case "clearCache":
 			echo "Clear cache";
 			
 			break;
 
 		// Turns inline debugging on
-		case "debug_on":
+		case "debugOn":
 			echo "Debug on";
 			
 			break;
 
 		// Turns inline debugging off
-		case "debug_off":
+		case "debugOff":
 			echo "Debug off";
 			
 			break;
@@ -254,8 +259,8 @@ if ($authenticated == TRUE)
 		// Display of external images and html in signatures disallowed.
 		// Upload of custom avatar images disallowed.
 		
-		case "war_footing":
-			echo "Site shifted to war footing";
+		case "lockDown":
+			echo "Site locked down";
 			break;
 	}
 }

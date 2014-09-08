@@ -30,7 +30,6 @@ class mod_straylight_ClientHandler extends icms_ipf_Handler {
 	public function update_request_counter($clientObj, $counter){
 		$clientObj->setVar('request_counter', $counter);
 		$this->insert($clientObj, TRUE);
-		echo 'counter is: ' . $counter;
 	}
 	
 	/**
