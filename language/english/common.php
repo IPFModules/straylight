@@ -32,6 +32,7 @@ define("_CO_STRAYLIGHT_CLIENT_SHARED_HMAC_KEY_DSC", "Use a 256 character key for
 define("_CO_STRAYLIGHT_CLIENT_ERROR", "Error: ");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_MISSING_REQUIRED_PARAMETER", "Missing required parameter.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_CLIENT_ID_NOT_DECIMAL", "Client ID not in decimal format.");
+define("_CO_STRAYLIGHT_CLIENT_ERROR_COMMAND_NOT_ALPHANUMERIC", "Command not in alphanumeric format.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_COUNTER_NOT_DECIMAL", "Counter not in decimal format.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_TIMESTAMP_NOT_DECIMAL", "Timestamp not in decimal format.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_RANDOM_NOT_ALPHANUMERIC", "Random factor not in alphanumeric 
@@ -45,10 +46,9 @@ define("_CO_STRAYLIGHT_CLIENT_ERROR_BAD_COUNTER", "Bad counter. This is not the 
 define("_CO_STRAYLIGHT_CLIENT_ERROR_NO_PRESHARED_KEY", "No pre-shared key.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_BAD_HMAC", "Bad HMAC. Failed to confirm authenticity and 
 	integrity of message. Discarding.");
+define("_CO_STRAYLIGHT_CLIENT_ERROR_INVALID_COMMAND", "Invalid command.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_SANITY_CHECK_FAILED", "Sanity check failed, request not 
 	authenticated.");
-define("_CO_STRAYLIGHT_CLIENT_ERROR_", "");
-define("_CO_STRAYLIGHT_CLIENT_ERROR_", "");
 
 // Admin table
 define("_CO_STRAYLIGHT_USER_NAME", "User name");
