@@ -47,7 +47,7 @@ function straylight_update_config($conf_name, $conf_value) {
 
 function straylight_report_error($error) {
 	// IMPORTANT: Ensure the error message is commented OUT on production sites
-	echo 'Error: ' . $error;
+	echo _CO_STRAYLIGHT_CLIENT_ERROR . $error;
 	exit;
 }
 
@@ -78,19 +78,19 @@ if (empty($_POST['client_id'])
 		|| empty($_POST['timestamp']) 
 		|| empty($_POST['random']) 
 		|| empty($_POST['hmac'])) {
-	straylight_report_error('Missing required parameter');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_MISSING_REQUIRED_PARAMETER);
 }
 
 // 2. Check that required parameters are of expected type and sanitise. Exit if encounter bad data.
 $clean_client_id = ctype_digit($_POST['client_id']) ? 
-	(int)($_POST['client_id']) : straylight_report_error('Client ID not decimal format');
+	(int)($_POST['client_id']) : straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_CLIENT_ID_NOT_DECIMAL);
 $clean_counter = ctype_digit($_POST['counter']) ?
-	(int)($_POST['counter']) : straylight_report_error('Counter not in decimal format');
+	(int)($_POST['counter']) : straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_COUNTER_NOT_DECIMAL);
 $clean_command = trim($_POST['command']); // Sanitise???
 $clean_timestamp = ctype_digit($_POST['timestamp']) ?
-	(int)($_POST['timestamp']) : straylight_report_error('Timestamp not decimal format');
+	(int)($_POST['timestamp']) : straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_TIMESTAMP_NOT_DECIMAL);
 $clean_random = ctype_alnum($_POST['random']) ?
-	trim($_POST['random']) : straylight_report_error('Random factor not alphanumeric');
+	trim($_POST['random']) : straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_RANDOM_NOT_ALPHANUMERIC);
 $clean_hmac = trim($_POST['hmac']);
 
 // 2. Check command against vocabulary whitelist. Exit if command invalid. Alphabetical only.
@@ -123,7 +123,7 @@ $timestamp_differential = $time - $clean_timestamp;
 if ($clean_timestamp <= $time && $timestamp_differential < icms_getConfig('timestamp_tolerance', 'straylight')) {
 	$good_timestamp = TRUE;
 } else {
-	straylight_report_error('Bad timestamp. Check the clock of your device is accurate.');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_BAD_TIMESTAMP);
 }
 
 // b. Check the device is currently Straylight authorised.
@@ -132,7 +132,7 @@ $straylight_client = $straylight_client_handler->get($clean_client_id);
 if ($straylight_client && ($straylight_client->getVar('authorised', 'e') == TRUE)) {
 	$straylight_authorised_client = TRUE;
 } else {
-	straylight_report_error('Client not Straylight authorised');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_CLIENT_NOT_AUTHORISED);
 }
 
 // c. Check request counter exceeds the stored value (guard against replay attacks)
@@ -140,7 +140,7 @@ if ($clean_counter > $straylight_client->getVar('request_counter', 'e')) {
 	$good_counter = TRUE;
 	$straylight_client_handler->update_request_counter($straylight_client, $clean_counter);
 } else {
-	straylight_report_error('Bad counter. This is not the most recent request from the client device.');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_BAD_COUNTER);
 }
 
 /**
@@ -171,15 +171,14 @@ $data = $clean_client_id . $clean_command
 if (!empty($key)) {
 	$my_hmac = hash_hmac('sha256', $data, $key, FALSE);
 } else {
-	straylight_report_error('No preshared key');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_NO_PRESHARED_KEY);
 }
 if ($my_hmac == $clean_hmac) // HMAC verified, authenticity and integrity has been established. 
 {
 	$good_hmac = TRUE;
-	echo '<br />SUCCESS<br />';
 }
 else {
-	straylight_report_error('Bad HMAC. Failed to confirm authenticity and integrity of message. Discarding.<br />');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_BAD_HMAC);
 }
 
 // Final sanity check. Explicitly check that all necessary tests have been passed
@@ -190,7 +189,7 @@ if ($valid_request
 		&& $good_hmac) {
 	$authenticated = TRUE;	
 } else {
-	straylight_report_error('Sanity check failed, request not authenticated.');
+	straylight_report_error(_CO_STRAYLIGHT_CLIENT_ERROR_SANITY_CHECK_FAILED);
 }
 
 //////////////////////////////////////////////////////////////////////
