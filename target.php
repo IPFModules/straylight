@@ -39,9 +39,10 @@ function straylight_update_config($conf_name, $conf_value) {
 	$criteria = icms_buildCriteria(array('conf_name' => $conf_name));
 	$config_handler = icms::handler('icms_config');
 	$configs = $config_handler->getConfigs($criteria);
-	$configs = array_pop($configs);
-	$configs->setVar('conf_value', $conf_value);
-	$config_handler->insertConfig($configs);
+	foreach ($configs as $config) {
+		$config->setVar('conf_value', $conf_value);
+		$config_handler->insertConfig($config);
+	}
 }
 
 function straylight_report_error($error) {
@@ -85,7 +86,7 @@ $clean_client_id = ctype_digit($_POST['client_id']) ?
 	(int)($_POST['client_id']) : straylight_report_error('Client ID not decimal format');
 $clean_counter = ctype_digit($_POST['counter']) ?
 	(int)($_POST['counter']) : straylight_report_error('Counter not in decimal format');
-$clean_command = trim($_POST['command']);
+$clean_command = trim($_POST['command']); // Sanitise???
 $clean_timestamp = ctype_digit($_POST['timestamp']) ?
 	(int)($_POST['timestamp']) : straylight_report_error('Timestamp not decimal format');
 $clean_random = ctype_alnum($_POST['random']) ?
@@ -149,11 +150,15 @@ if ($clean_counter > $straylight_client->getVar('request_counter', 'e')) {
  * own HMAC calculation. To protect against tampering, all request fields must be included in the 
  * calculation (except for the HMAC itself).
  * 
- * Note: Special characters included in the GET request from your device need to be url encoded or 
+ * Note: Special characters included in the POST request from your device need to be url encoded or 
  * serialised, and then decoded here prior to calculating the HMAC to ensure a reproduceable result.
  * Some characters, especially spaces and entities such as '&' can also mess up your parameters if
  * not encoded. If your device can't urlencode or is too limited to do it manually, then avoid use 
- * of such characters.
+ * of such characters. 
+ * 
+ * CONVENTION: Only use alphanumeric characters in Straylight request parameters. We can't be sure
+ * that all client devices will have a way to urlencode, or perhaps it will require including 
+ * libraries that eat up limited memory space (in Arduino for example, this is a huge issue).
  */
 
 $key = $straylight_client->getVar('shared_hmac_key', 'e');
@@ -223,7 +228,8 @@ if ($authenticated == TRUE)
 
 		// Clears the /cache and /templates_c folders
 		case "clearCache":
-			echo "Clear cache";
+			icms_core_Filesystem::cleanFolders(array('templates_c' => ICMS_COMPILE_PATH . "/",
+				'cache' => ICMS_CACHE_PATH . "/"), $remove_admin_cache);
 			break;
 
 		// Turns inline debugging on
@@ -236,25 +242,27 @@ if ($authenticated == TRUE)
 			straylight_update_config('debug_mode', 0);
 			break;
 
-		// Prepares the site to resist casual abuse by idiots. Protective measures include:
-		// New user registrations are closed.
-		// Multiple login of same user disallowed.
-		// IP bans are enabled
-		// Comments are closed for all modules.
-		// CAPTCHA enabled on forms
-		// HTML purifier is enabled
-		// Minimum search string set to at least 5 characters.
-		// GZIP compression is disabled (reduces processer load at cost of increased bandwidth)
-		// Minimum password length set to 8 characters.
-		// Minimum security level set to strong.
-		// User change of email address disallowed.
-		// User change of display name disallowed.
-		// Display of external images and html in signatures disallowed.
-		// Upload of custom avatar images disallowed.
-		
+		// Prepares the site to resist casual abuse by idiots
 		case "lockDown":
-			// Run straylight_update_config for each setting
-			break;
+			straylight_update_config('activation_type', 2); // New user registrations require admin approval
+			straylight_update_config('activation_group', 1); // Registration activation requests sent to admins
+			straylight_update_config('minpass', 13); // Sets minimum password length to 13 characters
+			straylight_update_config('pass_level', 80); // Sets minimum password security level to 'strong'
+			straylight_update_config('minuname', 5); // Set minimum username length to 5 characters
+			straylight_update_config('multi-login', 0); // Multiple login of same user disallowed
+			straylight_update_config('remember_me', 0); // Remember me login feature disabled
+			straylight_update_config('self-delete', 0); // Prevent users deleting their own account
+			straylight_update_config('enable_badips', 1); // IP bans are enabled
+			straylight_update_config('com_rule', 0); // Comments are closed for all modules
+			straylight_update_config('use_captcha', 1); // CAPTCHA enabled on forms, including registration
+			straylight_update_config('use_captchaf', 1); // CAPTCHA enabled on forms (general pref)
+			straylight_update_config('keyword_min', 5); // Minimum search keyword at least 5 chars
+			straylight_update_config('gzip_compression', 0); // Disable GZIP compression (reduces processer load)
+			straylight_update_config('allow_chgmail', 0); // User change of email address disallowed
+			straylight_update_config('allow_chguname', 0); // User change of display name disallowed
+			straylight_update_config('allow_htsig', 0); // Display of external images and html in signatures disallowed
+			straylight_update_config('avatar_allow_upload', 0); // Upload of custom avatar images disallowed
+		break;
 	}
 }
 else {

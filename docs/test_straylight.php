@@ -30,7 +30,7 @@
 $client_id = '3'; // The ID of the authorised straylight client you created in the module
 $pre_shared_key = 'JOfUS03S9CDtPyHnNH0DbihTDauaEYDidiSzFB1pqOzij9heJZanLC4m3762mAdqnYkc8SaSc7Nfg7648t72pPVvYjfWC8XvLkeIe7fZYh4lum2DhH7HCNqCjHuPZs9A0lgD6BTN860PHjHP1H6myshaWzgvH6tzA83qXj7jUDtMqsorjRLrdRACqITBr1tUQAfkCbMhHlAUgOpcGMooGIl5RQWnY1Yi1Rncu8JF5Lx378NrVfe9m5RlWMYRG1jI'; // The same 256 character random key you registered in the authorised client
 $url = 'http://192.168.1.99/dev'; // Enter the base URL of your site (eg. http://www.mysite.com or http://localhost etc).
-$counter = 76; // Need to increment this each run of the script. Sorry!
+$counter = 79; // Need to increment this each run of the script. Sorry!
 
 // Initialising other variables (no need to edit)
 $command = trim($_POST['command'], FILTER_SANITISE_STRING);
@@ -110,8 +110,7 @@ switch ($_POST['action']) {
 		// Command menu
 		$form = '<form name="input" action="' . $_SERVER['PHP_SELF'] . '" method="post">
 			<input type="radio" name="command" value="checkPulse">Check pulse<br />
-			<input type="radio" name="command" value="checkStatus">Check status<br />
-			<input type="radio" name="command" value="openSite">Open site<br />
+			<!--<input type="radio" name="command" value="openSite">Open site<br />-->
 			<input type="radio" name="command" value="closeSite">Close site<br />
 			<input type="radio" name="command" value="clearCache">Clear cache<br />
 			<input type="radio" name="command" value="debugOn">Debug on<br />
