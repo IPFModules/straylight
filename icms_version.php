@@ -34,13 +34,13 @@ $modversion = array(
 
 /**  Development information */
 	"status_version"            => "1.0",
-	"status"					=> "Beta",
-	"date"						=> "Unreleased",
+	"status"					=> "Alpha",
+	"date"						=> "10/9/2014",
 	"author_word"               => "For use by trusted administrators only.",
 	"warning"					=> _CO_ICMS_WARNING_BETA,
 
 /** Contributors */
-	"developer_website_url"     => "https://www.isengard.biz",
+	"developer_website_url"     => "http://www.isengard.biz",
 	"developer_website_name"    => "Isengard.biz",
 	"developer_email"           => "simon@isengard.biz",
 
@@ -57,7 +57,7 @@ $modversion = array(
 	"hasSearch"					=> 0,
 
 /** Menu information */
-	"hasMain"					=> 1,
+	"hasMain"					=> 0,
 
 /** Comments information */
 	"hasComments"               => 0);
@@ -75,11 +75,7 @@ $modversion["tables"] = icms_getTablesArray($modversion['dirname'], $modversion[
 
 /** Templates information */
 $modversion['templates'] = array(
-	array("file" => "straylight_admin_client.html", "description" => "Client admin index"),
-	array("file" => "straylight_client.html", "description" => "Client index"),
-
-	array('file' => 'straylight_header.html', 'description' => 'Module header'),
-	array('file' => 'straylight_footer.html', 'description' => 'Module footer'));
+	array("file" => "straylight_admin_client.html", "description" => "Client admin index"));
 
 /** Preferences information **/
 $modversion['config'][] = array(
