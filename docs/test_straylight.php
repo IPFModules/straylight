@@ -28,7 +28,7 @@
 
 // Please edit these variables or the script cannot function.
 // Do not put any linebreaks in the key!
-$client_id = '3'; // The ID of the authorised straylight client you created in the module
+$client_id = ''; // The ID of the authorised straylight client you created in the module
 $pre_shared_key = ''; // The same 256 character random key you registered in the authorised client
 $url = ''; // Enter the base URL of your site (eg. http://www.mysite.com or http://localhost etc).
 $counter = 1; // Need to increment this each run of the script. Sorry!
