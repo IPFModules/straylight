@@ -101,13 +101,13 @@ class mod_straylight_ClientHandler extends icms_ipf_Handler {
 			(int)($dirty_data['client_id']) : $this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_CLIENT_ID_NOT_DECIMAL);
 		$this->clean_counter = ctype_digit($dirty_data['counter']) ?
 			(int)($dirty_data['counter']) : $this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_COUNTER_NOT_DECIMAL);
-		$this->clean_command = ctype_alnum($dirty_data['command']) ?
+		$this->clean_command = ctype_alpha($dirty_data['command']) ?
 			trim($dirty_data['command']) : $this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_COMMAND_NOT_ALPHANUMERIC);
-		$this->clean_timestamp = ctype_digit($dirty_data['timestamp']) ? // filter sanitise string?
+		$this->clean_timestamp = ctype_digit($dirty_data['timestamp']) ?
 			(int)($dirty_data['timestamp']) : $this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_TIMESTAMP_NOT_DECIMAL);
 		$this->clean_random = ctype_alnum($dirty_data['random']) ?
 			trim($dirty_data['random']) : $this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_RANDOM_NOT_ALPHANUMERIC);
-		$this->clean_hmac = ctype_alnum($dirty_data['hmac']) ? // filter sanitise string?
+		$this->clean_hmac = ctype_alnum($dirty_data['hmac']) ?
 			trim($dirty_data['hmac']) : $this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_HMAC_NOT_ALPHANUMERIC);
 	}
 	

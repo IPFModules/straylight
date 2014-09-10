@@ -1,2 +1,3 @@
-Unreleased: Version 1.0 ALPHA
-=============================
+Version 1.0 ALPHA
+=================
+* Released 10/9/2014.
