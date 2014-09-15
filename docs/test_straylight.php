@@ -28,9 +28,10 @@
 
 // Please edit these variables or the script cannot function.
 // Do not put any linebreaks in the key!
+
 $client_id = ''; // The ID of the authorised straylight client you created in the module
-$pre_shared_key = ''; // The same 256 character random key you registered in the authorised client
-$url = ''; // Enter the base URL of your site (eg. http://www.mysite.com or http://localhost etc).
+$pre_shared_key = ''; // The 64 character pre-shared key
+$url = ''; // Enter the base URL of your site WITHOUT trailing slash (eg. http://www.mysite.com or http://localhost etc).
 $counter = 1; // Need to increment this each run of the script. Sorry!
 
 // Initialising other variables (no need to edit)
@@ -41,11 +42,9 @@ $path = $url . '/modules/straylight/target.php';
 $data = '';
 $my_hmac = '';
 
-// For convenience (testing) sake, but this is NOT an acceptable (secure) way to generate random strings
-// Also, don't forget that the total length of all parameters sent in a Straylight request should be
-// > 256 characters in order to maintain the full security of the HMAC.
-function generateRandomString($length = 62) {
-    return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
+// For convenience (testing) sake, but this is NOT a secure way to generate random strings
+function generateRandomString($length = 64) {
+    return substr(str_shuffle("0123456789abcdef"), 0, $length);
 }
 
 echo '<h1>Straylight test script</h1>';
@@ -58,7 +57,7 @@ switch ($_POST['action']) {
 			. $counter
 			. $timestamp
 			. $random;
-		$my_hmac = hash_hmac('sha256', $data, $pre_shared_key, FALSE);
+		$my_hmac = substr(hash_hmac('sha256', $data, $pre_shared_key, FALSE), 0, 32);
 		$command_parameters = array(
 			'client_id' => $client_id,
 			'command' => $command,
@@ -95,14 +94,14 @@ switch ($_POST['action']) {
 
 		// Check that required variables have been set
 		if ($client_id == '') {
-			echo '<p>Please create an authorised straylight client within the Straylight module (obviously, 
-				after you have installed it) and note it\'s ID number. Set the $client_id variable in the 
-				script to be the same.</p>';
+			echo '<p>Please create an authorised straylight client within the Straylight module 
+				(obviously, after you have installed it) and note it\'s ID number. Set the 
+				$client_id variable in the script to be the same.</p>';
 		}
 		if ($pre_shared_key == '') {
-			echo '<p>Please generate a RANDOM 256 character key and use it to set the $pre_shared_key 
-				variable in the script. The same key must be registered in an authorised straylight client 
-				within the admin interface of the module.</p>';
+			echo '<p>Please generate a RANDOM 256 bit hexadecimal key and use it to set the 
+				$pre_shared_key variable in the script. The same key must be registered in an 
+				authorised straylight client within the admin interface of the module.</p>';
 		}
 		if ($url == '') {
 			echo '<p>Please enter your site URL in the $url variable of the script.</p>';

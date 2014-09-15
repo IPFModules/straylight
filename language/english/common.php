@@ -13,6 +13,7 @@
 defined("ICMS_ROOT_PATH") or die("ICMS root path not defined");
 
 // Client device
+define("_CO_STRAYLIGHT_CLIENT_CLIENT_ID", "Client ID");
 define("_CO_STRAYLIGHT_CLIENT_TITLE", "Remote client name");
 define("_CO_STRAYLIGHT_CLIENT_AUTHORISED", "Authorised?");
 define("_CO_STRAYLIGHT_CLIENT_AUTHORISED_DSC", "Enable or disable remote administrative privileges 
@@ -22,9 +23,11 @@ define("_CO_STRAYLIGHT_CLIENT_REQUEST_COUNTER_DSC", "Tracks the number of reques
 	client to prevent replay attacks. Client requests include an incremental counter value, if it 
 	is lower than the value stored in the database the request is rejected.");
 define("_CO_STRAYLIGHT_CLIENT_SHARED_HMAC_KEY", "Shared HMAC key");
-define("_CO_STRAYLIGHT_CLIENT_SHARED_HMAC_KEY_DSC", "Use a 256 character key for optimum security. 
-	Used to check the authenticity and integrity of data submitted by the client device by SHA256 
-	HMAC. Requests that are not accompanied by a valid HMAC will be discarded.");
+define("_CO_STRAYLIGHT_CLIENT_SHARED_HMAC_KEY_DSC", "Use a RANDOM 256 bit key (64 hexadecimal 
+	characters in the range 0-9, a-f) for optimum security. You can get them easily by visiting 
+	www.grc.com/passwords and copying the output of the first box. Used to check the authenticity 
+	and integrity of data submitted by the client device by SHA256 HMAC. Requests that are not 
+	accompanied by a valid HMAC will be discarded.");
 
 // Error messages - only displayed when the output of report_error() is enabled. As a rule, 
 // Straylight does not provide feedback to clients about error conditions for security reasons.
@@ -49,6 +52,7 @@ define("_CO_STRAYLIGHT_CLIENT_ERROR_BAD_HMAC", "Bad HMAC. Failed to confirm auth
 define("_CO_STRAYLIGHT_CLIENT_ERROR_INVALID_COMMAND", "Invalid command.");
 define("_CO_STRAYLIGHT_CLIENT_ERROR_SANITY_CHECK_FAILED", "Sanity check failed, request not 
 	authenticated.");
+define("_CO_STRAYLIGHT_CLIENT_KEY_LENGTH_ERROR", "Key must be exactly 64 characters in length.");
 
 // Admin table
 define("_CO_STRAYLIGHT_USER_NAME", "User name");

@@ -192,7 +192,7 @@ class mod_straylight_ClientHandler extends icms_ipf_Handler {
 				. $this->clean_timestamp
 				. $this->clean_random;
 		if (!empty($key)) {
-			$this->my_hmac = hash_hmac('sha256', $this->my_data, $key, FALSE);
+			$this->my_hmac = substr(hash_hmac('sha256', $this->my_data, $key, FALSE), 0, 32);
 		} else {
 			$this->report_error(_CO_STRAYLIGHT_CLIENT_ERROR_NO_PRESHARED_KEY);
 		}
@@ -340,6 +340,24 @@ class mod_straylight_ClientHandler extends icms_ipf_Handler {
 		$this->insert($clientObj, TRUE);
 
 		return $authorised;
+	}
+	
+	/**
+	 * Adjust data before saving or updating
+	 * @param object $obj 
+	 */
+	protected function beforeSave(& $obj) {		
+		// Require key length to be 64 characters. Todo: Check all are in hexadecimal range.
+		$key = trim($obj->getVar('shared_hmac_key', 'e'));
+		if (strlen($key)==64) {
+			$obj->setVar('shared_hmac_key', $key); // Trim any whitespace user entered in box
+			return TRUE;
+		} else {
+			$obj->setErrors(_CO_STRAYLIGHT_CLIENT_KEY_LENGTH_ERROR);
+			return FALSE;
+		}
+		return TRUE;
+		
 	}
 	
 	/**
